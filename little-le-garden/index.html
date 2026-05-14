@@ -8,7 +8,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
 
 :root {
-  /* 溫暖繪本色系 — 紙張與蠟筆感 */
   --bg: #fdf6e3;
   --bg-warm: #f5e6d3;
   --paper: #fffef8;
@@ -32,7 +31,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== 橫向翻頁容器 ===== */
 .deck-container {
   position: relative;
   width: 100%; height: 100%;
@@ -60,7 +58,6 @@ html, body {
   background: var(--bg);
 }
 
-/* ===== 封面頁 ===== */
 .slide-cover {
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
 }
@@ -93,7 +90,6 @@ html, body {
   letter-spacing: 0.1em;
 }
 
-/* ===== 內容頁（全頁圖片模式） ===== */
 .slide-fullimage {
   padding: 2vh 2vw;
   background: linear-gradient(180deg, #f0e6d6 0%, var(--bg) 30%, var(--bg) 70%, #f0e6d6 100%);
@@ -110,28 +106,6 @@ html, body {
   padding: 6px;
 }
 
-/* ===== 尾頁 ===== */
-.slide-ending {
-  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
-}
-.ending-content {
-  text-align: center;
-  padding: 4vh;
-}
-.ending-icon {
-  font-size: clamp(48px, 10vw, 90px);
-  margin-bottom: 3vh;
-  filter: drop-shadow(0 4px 8px var(--shadow));
-}
-.ending-text {
-  font-size: clamp(18px, 3vw, 28px);
-  color: var(--text-secondary);
-  line-height: 1.8;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-}
-
-/* ===== 頁碼 ===== */
 .page-num {
   position: absolute;
   bottom: 2.5vh;
@@ -143,7 +117,6 @@ html, body {
   letter-spacing: 0.1em;
 }
 
-/* ===== 導航圓點 ===== */
 .nav-dots {
   position: fixed;
   bottom: 2.5vh;
@@ -171,7 +144,6 @@ html, body {
   transform: scale(1.25);
 }
 
-/* ===== 目錄按鈕 ===== */
 .index-btn {
   position: fixed;
   top: 2.5vh;
@@ -192,7 +164,6 @@ html, body {
 }
 .index-btn:active { transform: scale(0.92); }
 
-/* ===== 目錄覆蓋層 ===== */
 #index-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -251,7 +222,6 @@ html, body {
   font-weight: 400;
 }
 
-/* ===== 首次使用提示 ===== */
 .hint-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -285,7 +255,6 @@ html, body {
   color: var(--text-secondary);
 }
 
-/* ===== 響應式 ===== */
 @media (max-width: 768px) {
   .index-grid { grid-template-columns: 1fr; }
   .page-image { max-height: 78vh; }
@@ -295,7 +264,6 @@ html, body {
 </head>
 <body>
 
-<!-- 翻頁容器 -->
 <div class="deck-container" id="deck">
 
   <!-- 第1頁：封面 -->
@@ -342,39 +310,29 @@ html, body {
     <div class="page-num">07 / 09</div>
   </section>
 
-  <!-- 第8頁：過渡頁（可放更多畫作） -->
+  <!-- 第8頁：更多精彩（08-more.png） -->
   <section class="slide slide-fullimage" data-index="7">
     <img src="images/08-more.png" alt="更多精彩" class="page-image" loading="lazy">
     <div class="page-num">08 / 09</div>
   </section>
 
-  <!-- 第9頁：尾頁 -->
-  <section class="slide slide-ending" data-index="8">
-    <div class="ending-content">
-      <div class="ending-icon">🌸</div>
-      <p class="ending-text">
-        給小樂：<br>
-        願你的花園，永遠充滿奇幻與愛。
-      </p>
-    </div>
+  <!-- 第9頁：尾頁（09-ending.png） -->
+  <section class="slide slide-fullimage" data-index="8">
+    <img src="images/09-ending.png" alt="尾頁祝福" class="page-image" loading="lazy">
     <div class="page-num">09 / 09</div>
   </section>
 
 </div>
 
-<!-- 導航圓點（JS 自動生成） -->
 <div class="nav-dots" id="navDots"></div>
 
-<!-- 目錄按鈕 -->
 <div class="index-btn" onclick="toggleIndex()" title="目錄">☰</div>
 
-<!-- 目錄覆蓋層 -->
 <div id="index-overlay" onclick="closeIndex()">
   <div class="index-title">📖 繪本目錄</div>
   <div class="index-grid" id="indexGrid"></div>
 </div>
 
-<!-- 首次提示 -->
 <div class="hint-overlay" id="hint">
   <div class="hint-box">
     <p>👈 左右滑動翻頁 👉</p>
@@ -383,13 +341,11 @@ html, body {
 </div>
 
 <script>
-/* ===== 核心邏輯 ===== */
 const deck = document.getElementById('deck');
 const slides = document.querySelectorAll('.slide');
 const totalSlides = slides.length;
 let currentSlide = 0;
 
-// 頁面標題（用於目錄）
 const pageTitles = [
   '封面：小樂的花園奇幻冒險',
   '陽光下，種下愛',
@@ -402,7 +358,6 @@ const pageTitles = [
   '尾頁：給小樂的祝福'
 ];
 
-// 生成導航圓點
 const dotsContainer = document.getElementById('navDots');
 for(let i=0; i<<totalSlides; i++){
   const dot = document.createElement('div');
@@ -411,7 +366,6 @@ for(let i=0; i<<totalSlides; i++){
   dotsContainer.appendChild(dot);
 }
 
-// 生成目錄
 const indexGrid = document.getElementById('indexGrid');
 slides.forEach((slide, i) => {
   const item = document.createElement('div');
@@ -424,7 +378,6 @@ slides.forEach((slide, i) => {
   indexGrid.appendChild(item);
 });
 
-// 跳轉到指定頁
 function goToSlide(index){
   if(index < 0 || index >= totalSlides) return;
   currentSlide = index;
@@ -432,14 +385,12 @@ function goToSlide(index){
   updateDots();
 }
 
-// 更新圓點狀態
 function updateDots(){
   document.querySelectorAll('.nav-dot').forEach((d,i) => {
     d.classList.toggle('active', i === currentSlide);
   });
 }
 
-// 滾動監聽（計算目前頁）
 let scrollTimeout;
 deck.addEventListener('scroll', () => {
   clearTimeout(scrollTimeout);
@@ -452,7 +403,6 @@ deck.addEventListener('scroll', () => {
   }, 80);
 });
 
-// 鍵盤支援
 document.addEventListener('keydown', (e) => {
   if(e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){
     e.preventDefault();
@@ -465,7 +415,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// 觸控滑動（iPhone 核心體驗）
 let touchStartX = 0;
 let touchStartY = 0;
 deck.addEventListener('touchstart', (e) => {
@@ -479,19 +428,16 @@ deck.addEventListener('touchend', (e) => {
   const diffX = touchStartX - endX;
   const diffY = touchStartY - endY;
   
-  // 只有水平滑動夠長，且垂直滑動不過大時才翻頁
   if(Math.abs(diffX) > 50 && Math.abs(diffY) < 100){
     if(diffX > 0) goToSlide(currentSlide + 1);
     else goToSlide(currentSlide - 1);
   }
 }, {passive:true});
 
-// 目錄控制
 const indexOverlay = document.getElementById('index-overlay');
 function toggleIndex(){ indexOverlay.classList.toggle('active'); }
 function closeIndex(){ indexOverlay.classList.remove('active'); }
 
-// 首次提示（3秒後自動消失）
 const hint = document.getElementById('hint');
 setTimeout(() => hint.classList.add('show'), 500);
 hint.addEventListener('click', () => hint.classList.remove('show'));
