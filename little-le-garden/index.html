@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小樂的花園奇幻冒險</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+:root {
+  /* 溫暖繪本色系 — 紙張與蠟筆感 */
+  --bg: #fdf6e3;
+  --bg-warm: #f5e6d3;
+  --paper: #fffef8;
+  --text-primary: #5c4a3d;
+  --text-secondary: #8b7355;
+  --accent: #e67e22;
+  --accent-soft: rgba(230,126,34,0.15);
+  --border: rgba(92,74,61,0.12);
+  --shadow: rgba(92,74,61,0.18);
+  --font: 'Noto Sans TC', -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== 橫向翻頁容器 ===== */
+.deck-container {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.deck-container::-webkit-scrollbar { display: none; }
+
+.slide {
+  flex: 0 0 100vw;
+  width: 100vw; height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4vh 4vw;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ===== 封面頁 ===== */
+.slide-cover {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
+}
+.cover-image {
+  max-width: 85vw;
+  max-height: 50vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px var(--shadow);
+  background: var(--paper);
+  padding: 10px;
+  margin-bottom: 3vh;
+}
+.cover-title {
+  font-size: clamp(26px, 6vw, 52px);
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  margin-bottom: 1vh;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.cover-subtitle {
+  font-size: clamp(14px, 2.2vw, 20px);
+  font-weight: 300;
+  text-align: center;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+}
+
+/* ===== 內容頁（全頁圖片模式） ===== */
+.slide-fullimage {
+  padding: 2vh 2vw;
+  background: linear-gradient(180deg, #f0e6d6 0%, var(--bg) 30%, var(--bg) 70%, #f0e6d6 100%);
+}
+.page-image {
+  max-width: 92vw;
+  max-height: 85vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--shadow);
+  background: var(--paper);
+  padding: 6px;
+}
+
+/* ===== 尾頁 ===== */
+.slide-ending {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-warm) 100%);
+}
+.ending-content {
+  text-align: center;
+  padding: 4vh;
+}
+.ending-icon {
+  font-size: clamp(48px, 10vw, 90px);
+  margin-bottom: 3vh;
+  filter: drop-shadow(0 4px 8px var(--shadow));
+}
+.ending-text {
+  font-size: clamp(18px, 3vw, 28px);
+  color: var(--text-secondary);
+  line-height: 1.8;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* ===== 頁碼 ===== */
+.page-num {
+  position: absolute;
+  bottom: 2.5vh;
+  right: 5vw;
+  font-family: monospace;
+  font-size: clamp(11px, 1.3vw, 14px);
+  color: var(--text-secondary);
+  opacity: 0.7;
+  letter-spacing: 0.1em;
+}
+
+/* ===== 導航圓點 ===== */
+.nav-dots {
+  position: fixed;
+  bottom: 2.5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(8px);
+}
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  opacity: 0.35;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.nav-dot.active {
+  background: var(--accent);
+  opacity: 1;
+  transform: scale(1.25);
+}
+
+/* ===== 目錄按鈕 ===== */
+.index-btn {
+  position: fixed;
+  top: 2.5vh;
+  right: 4vw;
+  z-index: 100;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,254,248,0.9);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  backdrop-filter: blur(4px);
+  transition: transform 0.2s ease;
+}
+.index-btn:active { transform: scale(0.92); }
+
+/* ===== 目錄覆蓋層 ===== */
+#index-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(253,246,227,0.96);
+  backdrop-filter: blur(16px);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 6vh 6vw;
+}
+#index-overlay.active { display: flex; }
+.index-title {
+  font-size: clamp(22px, 3.5vw, 36px);
+  font-weight: 700;
+  margin-bottom: 3vh;
+  color: var(--text-primary);
+  letter-spacing: 0.1em;
+}
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5vh 3vw;
+  max-width: 640px;
+  width: 100%;
+}
+.index-item {
+  padding: 1.8vh 2.5vw;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 1.2vw;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.index-item:active {
+  border-color: var(--accent);
+  background: var(--bg-warm);
+  transform: scale(0.98);
+}
+.index-num {
+  font-family: monospace;
+  font-size: clamp(11px, 1.2vw, 13px);
+  color: var(--accent);
+  min-width: 2.2em;
+  font-weight: 600;
+}
+.index-text {
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* ===== 首次使用提示 ===== */
+.hint-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.35);
+  z-index: 150;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.hint-overlay.show { opacity: 1; pointer-events: auto; }
+.hint-box {
+  background: var(--paper);
+  padding: 3vh 4vw;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 80vw;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+.hint-box p {
+  font-size: clamp(16px, 2.5vw, 22px);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: 2vh;
+}
+.hint-box small {
+  font-size: clamp(12px, 1.5vw, 14px);
+  color: var(--text-secondary);
+}
+
+/* ===== 響應式 ===== */
+@media (max-width: 768px) {
+  .index-grid { grid-template-columns: 1fr; }
+  .page-image { max-height: 78vh; }
+  .cover-image { max-height: 45vh; }
+}
+</style>
+</head>
+<body>
+
+<!-- 翻頁容器 -->
+<div class="deck-container" id="deck">
+
+  <!-- 第1頁：封面 -->
+  <section class="slide slide-cover" data-index="0">
+    <img src="images/01-cover.png" alt="封面" class="cover-image" loading="eager">
+    <h1 class="cover-title">小樂的花園奇幻冒險</h1>
+    <p class="cover-subtitle">獻給 6 歲小樂的專屬繪本</p>
+    <div class="page-num">01 / 09</div>
+  </section>
+
+  <!-- 第2頁：陽光下 -->
+  <section class="slide slide-fullimage" data-index="1">
+    <img src="images/02-sunshine.png" alt="陽光下" class="page-image" loading="lazy">
+    <div class="page-num">02 / 09</div>
+  </section>
+
+  <!-- 第3頁：蝸牛 -->
+  <section class="slide slide-fullimage" data-index="2">
+    <img src="images/03-snail.png" alt="蝸牛" class="page-image" loading="lazy">
+    <div class="page-num">03 / 09</div>
+  </section>
+
+  <!-- 第4頁：快樂小豬 -->
+  <section class="slide slide-fullimage" data-index="3">
+    <img src="images/04-happy.png" alt="快樂" class="page-image" loading="lazy">
+    <div class="page-num">04 / 09</div>
+  </section>
+
+  <!-- 第5頁：紙板夢想 -->
+  <section class="slide slide-fullimage" data-index="4">
+    <img src="images/05-dream.png" alt="夢想" class="page-image" loading="lazy">
+    <div class="page-num">05 / 09</div>
+  </section>
+
+  <!-- 第6頁：勇氣翅膀 -->
+  <section class="slide slide-fullimage" data-index="5">
+    <img src="images/06-courage.png" alt="勇氣" class="page-image" loading="lazy">
+    <div class="page-num">06 / 09</div>
+  </section>
+
+  <!-- 第7頁：彩虹花 -->
+  <section class="slide slide-fullimage" data-index="6">
+    <img src="images/07-rainbow.png" alt="彩虹花" class="page-image" loading="lazy">
+    <div class="page-num">07 / 09</div>
+  </section>
+
+  <!-- 第8頁：過渡頁（可放更多畫作） -->
+  <section class="slide slide-fullimage" data-index="7">
+    <img src="images/08-more.png" alt="更多精彩" class="page-image" loading="lazy">
+    <div class="page-num">08 / 09</div>
+  </section>
+
+  <!-- 第9頁：尾頁 -->
+  <section class="slide slide-ending" data-index="8">
+    <div class="ending-content">
+      <div class="ending-icon">🌸</div>
+      <p class="ending-text">
+        給小樂：<br>
+        願你的花園，永遠充滿奇幻與愛。
+      </p>
+    </div>
+    <div class="page-num">09 / 09</div>
+  </section>
+
+</div>
+
+<!-- 導航圓點（JS 自動生成） -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- 目錄按鈕 -->
+<div class="index-btn" onclick="toggleIndex()" title="目錄">☰</div>
+
+<!-- 目錄覆蓋層 -->
+<div id="index-overlay" onclick="closeIndex()">
+  <div class="index-title">📖 繪本目錄</div>
+  <div class="index-grid" id="indexGrid"></div>
+</div>
+
+<!-- 首次提示 -->
+<div class="hint-overlay" id="hint">
+  <div class="hint-box">
+    <p>👈 左右滑動翻頁 👉</p>
+    <small>點擊任意處開始閱讀</small>
+  </div>
+</div>
+
+<script>
+/* ===== 核心邏輯 ===== */
+const deck = document.getElementById('deck');
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+let currentSlide = 0;
+
+// 頁面標題（用於目錄）
+const pageTitles = [
+  '封面：小樂的花園奇幻冒險',
+  '陽光下，種下愛',
+  '陪蝸牛慢慢走',
+  '線條簡單，快樂很滿',
+  '粗糙紙板上的夢想',
+  '看清目標，勇氣翅膀',
+  '最燦爛的太陽彩虹花',
+  '更多精彩',
+  '尾頁：給小樂的祝福'
+];
+
+// 生成導航圓點
+const dotsContainer = document.getElementById('navDots');
+for(let i=0; i<<totalSlides; i++){
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i===0?' active':'');
+  dot.onclick = () => goToSlide(i);
+  dotsContainer.appendChild(dot);
+}
+
+// 生成目錄
+const indexGrid = document.getElementById('indexGrid');
+slides.forEach((slide, i) => {
+  const item = document.createElement('div');
+  item.className = 'index-item';
+  item.onclick = (e) => { e.stopPropagation(); goToSlide(i); closeIndex(); };
+  item.innerHTML = `
+    <span class="index-num">${String(i+1).padStart(2,'0')}</span>
+    <span class="index-text">${pageTitles[i] || '第 '+(i+1)+' 頁'}</span>
+  `;
+  indexGrid.appendChild(item);
+});
+
+// 跳轉到指定頁
+function goToSlide(index){
+  if(index < 0 || index >= totalSlides) return;
+  currentSlide = index;
+  slides[index].scrollIntoView({behavior:'smooth', inline:'start'});
+  updateDots();
+}
+
+// 更新圓點狀態
+function updateDots(){
+  document.querySelectorAll('.nav-dot').forEach((d,i) => {
+    d.classList.toggle('active', i === currentSlide);
+  });
+}
+
+// 滾動監聽（計算目前頁）
+let scrollTimeout;
+deck.addEventListener('scroll', () => {
+  clearTimeout(scrollTimeout);
+  scrollTimeout = setTimeout(() => {
+    const newIndex = Math.round(deck.scrollLeft / window.innerWidth);
+    if(newIndex !== currentSlide && newIndex >= 0 && newIndex < totalSlides){
+      currentSlide = newIndex;
+      updateDots();
+    }
+  }, 80);
+});
+
+// 鍵盤支援
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){
+    e.preventDefault();
+    goToSlide(currentSlide + 1);
+  } else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){
+    e.preventDefault();
+    goToSlide(currentSlide - 1);
+  } else if(e.key === 'Escape'){
+    closeIndex();
+  }
+});
+
+// 觸控滑動（iPhone 核心體驗）
+let touchStartX = 0;
+let touchStartY = 0;
+deck.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+
+deck.addEventListener('touchend', (e) => {
+  const endX = e.changedTouches[0].clientX;
+  const endY = e.changedTouches[0].clientY;
+  const diffX = touchStartX - endX;
+  const diffY = touchStartY - endY;
+  
+  // 只有水平滑動夠長，且垂直滑動不過大時才翻頁
+  if(Math.abs(diffX) > 50 && Math.abs(diffY) < 100){
+    if(diffX > 0) goToSlide(currentSlide + 1);
+    else goToSlide(currentSlide - 1);
+  }
+}, {passive:true});
+
+// 目錄控制
+const indexOverlay = document.getElementById('index-overlay');
+function toggleIndex(){ indexOverlay.classList.toggle('active'); }
+function closeIndex(){ indexOverlay.classList.remove('active'); }
+
+// 首次提示（3秒後自動消失）
+const hint = document.getElementById('hint');
+setTimeout(() => hint.classList.add('show'), 500);
+hint.addEventListener('click', () => hint.classList.remove('show'));
+setTimeout(() => hint.classList.remove('show'), 4000);
+</script>
+
+</body>
+</html>
